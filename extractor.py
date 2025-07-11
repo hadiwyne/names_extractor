@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-11-openjdk-amd64'
 import re
 import spacy
 import pandas as pd
@@ -13,14 +14,12 @@ from spacy.lang.en.stop_words import STOP_WORDS
 def load_nlp_model():
     try:
         return spacy.load('en_core_web_sm')
-    except:
-        # If model not found, download it
-        import subprocess
-        subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
-        return spacy.load('en_core_web_sm')
+    except OSError:
+        import spacy.cli
+        spacy.cli.download('en_core_web_sm')
+        return spacy.load('en_core_web_sm'))
 
 def load_text(file_path):
-    """Load text from different file formats"""
     ext = os.path.splitext(file_path.name)[1].lower()
     
     if ext == ".pdf":
@@ -28,10 +27,8 @@ def load_text(file_path):
     elif ext == ".txt":
         return file_path.read().decode("utf-8")
     elif ext == ".epub":
-        # Save to temp file for Tika
-        with open("temp.epub", "wb") as f:
-            f.write(file_path.getbuffer())
-        return parser.from_file("temp.epub")['content']
+        # Use in-memory processing for EPUB
+        return parser.from_buffer(file_path.read())['content']  # Changed this line
     else:
         raise ValueError("Unsupported file format")
 
