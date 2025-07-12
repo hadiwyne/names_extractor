@@ -5,5 +5,5 @@ matplotlib
 PyPDF2
 ebooklib
 beautifulsoup4
-apache-tika
+tika
 Pillow
